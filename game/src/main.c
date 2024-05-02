@@ -1,6 +1,7 @@
 #include "body.h"
 #include "mathf.h"
 #include "World.h"
+#include "Integrator.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -10,43 +11,12 @@
 
 #define MAX_BODIES 100
 
-void UpdateAndDrawBodies()
-{
-	Body* body = bodies;
-	Vector2 position = GetMousePosition();
-
-	while (body)
-	{
-		if (body->position.y < 0 || body->position.y > 720)
-		{
-			body = body->next;
-			DestroyBody(body->prev);
-		}
-
-
-		if (body->position.x == 0 || body->position.y == 0)
-		{
-			body->position = position;
-		}
-
-		if (body->velocity.x == 0 || body->velocity.y == 0)
-		{
-			body->velocity.x = GetRandomFloatValue(-5, 5);
-			body->velocity.y = GetRandomFloatValue(-5, 5);
-		}
-
-		body->position = Vector2Add(body->position, body->velocity);
-
-		DrawCircle((int)body->position.x, (int)body->position.y, 10, GREEN);
-
-		body = body->next;
-	}
-}
-
 int main(void)
 {
 	InitWindow(1200, 720, "Physics Engine");
 	SetTargetFPS(60);
+
+	gravity = (Vector2){ 0, 30 };
 
 	// game loop
 	while (!WindowShouldClose())
@@ -56,12 +26,30 @@ int main(void)
 
 		Vector2 position = GetMousePosition();
 		if (IsMouseButtonDown(0)) {
-			if (bodyCount < MAX_BODIES) {
-				CreateBody();
-			}
+				Body* body = CreateBody();
+				body = CreateBody();
+				body->position = position;	
+				body->mass = GetRandomFloatValue(3, 20);
+				body->inverseMass = 1 / body->mass;
+				body->bodyType = BT_DYNAMIC;
+				body->damping = 0.5f;
+				body->gravityScale = 5.0f;
+				ApplyForce(body, (Vector2) { GetRandomFloatValue(-250, 250), GetRandomFloatValue(-250, 250) }, FM_VELOCITY);
 		}
 
-		UpdateAndDrawBodies();
+		Body* body = bodies;
+		while (body)
+		{
+			//ApplyForce(body, CreateVector2(0, 250), FM_FORCE);
+			body = body->next;
+		}
+
+		body = bodies;
+		while (body)
+		{
+			Step(body, dt);
+			body = body->next;
+		}
 
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -71,9 +59,15 @@ int main(void)
 
 		DrawCircle((int)position.x, (int)position.y, 10, WHITE);
 
+		body = bodies;
+		while (body)
+		{
+			DrawCircle((int)body->position.x, (int)body->position.y, body->mass, GREEN);
+			body = body->next;
+		}
+
 		EndDrawing();
 	}
-
 	CloseWindow();
 
 	return 0;

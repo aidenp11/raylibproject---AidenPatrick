@@ -1,14 +1,18 @@
 #include "World.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 Body* bodies = NULL;
 int bodyCount = 0;
+Vector2 gravity;
 
 Body* CreateBody()
 {
 	Body* newBody = (Body*)malloc(sizeof(Body));
-	assert(newBody != NULL);
+	assert(newBody);
+
+	memset(newBody, 0, sizeof(newBody));
 
 	newBody->position.x = 0.0f;
 	newBody->position.y = 0.0f;
