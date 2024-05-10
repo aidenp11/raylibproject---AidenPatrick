@@ -54,7 +54,7 @@ inline void ApplyForce(Body* body, Vector2 force, ForceMode forceMode)
 		break;
 	}
 
-	body->force = Vector2Add(body->force, force);
+	//body->force = Vector2Add(body->force, force);
 
 }
 

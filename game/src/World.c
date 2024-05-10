@@ -7,31 +7,38 @@ Body* bodies = NULL;
 int bodyCount = 0;
 Vector2 gravity;
 
-Body* CreateBody()
+Body* CreateBody(Vector2 position, float mass, BodyType bodyType)
 {
 	Body* newBody = (Body*)malloc(sizeof(Body));
 	assert(newBody);
 
 	memset(newBody, 0, sizeof(newBody));
-
-	newBody->position.x = 0.0f;
-	newBody->position.y = 0.0f;
-	newBody->velocity.x = 0.0f;
-	newBody->velocity.y = 0.0f;
-	newBody->force.x = 0.0f;
-	newBody->force.y = 0.0f;
-
-	newBody->prev = NULL;
-	newBody->next = bodies;
-
-	if (bodies != NULL) {
-		bodies->prev = newBody;
-	}
-
-	bodies = newBody;
-	bodyCount++;
+	newBody->position = position;
+	newBody->mass = mass;
+	newBody->inverseMass = (bodyType == BT_DYNAMIC) ? 1 / mass : 0;
+	newBody->bodyType = bodyType;
 
 	return newBody;
+}
+
+void AddBody(Body* body)
+{
+	assert(body);
+
+	body->velocity.x = 0.0f;
+	body->velocity.y = 0.0f;
+	body->force.x = 0.0f;
+	body->force.y = 0.0f;
+
+	body->prev = NULL;
+	body->next = bodies;
+
+	if (bodies != NULL) {
+		bodies->prev = body;
+	}
+
+	bodies = body;
+	bodyCount++;
 }
 
 void DestroyBody(Body* body)
