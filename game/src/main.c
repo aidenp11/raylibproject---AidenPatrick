@@ -5,6 +5,7 @@
 #include "Force.h"
 #include "editor.h"
 #include "render.h"
+#include "spring.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -18,6 +19,9 @@ static int mb = 0;
 EditorData editorData;
 int main(void)
 {
+	Body* selectedBody = NULL;
+	Body* connectBody = NULL;
+
 	InitWindow(1200, 720, "Physics Engine");
 	InitEditor();
 	SetTargetFPS(60);
@@ -35,10 +39,17 @@ int main(void)
 
 		UpdateEditor(position);
 
-		if (!ncEditorIntersect && IsMouseButtonDown(0)) {
+		selectedBody = GetBodyIntersect(bodies, position);
+		if (selectedBody)
+		{
+			Vector2 screen = ConvertWorldToScreen(selectedBody->position);
+			DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass) + 5, YELLOW);
+		}
+
+		if (!ncEditorIntersect && IsMouseButtonPressed(0)) {
 			mb = 0;
-			for (int i = 0; i < 1; i++)
-			{
+			/*for (int i = 0; i < 1; i++)
+			{*/
 
 				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
 				body->damping = editorData.damping;
@@ -46,13 +57,13 @@ int main(void)
 
 				AddBody(body);
 				//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-500, 0), GetRandomValue(0, 500)), GetRandomFloatValue(GetRandomValue(-600, 0), GetRandomValue(0, 600)) }, FM_VELOCITY);
-			}
+			//}
 		}
 
-		if (!ncEditorIntersect && IsMouseButtonDown(1)) {
+		if (!ncEditorIntersect && IsMouseButtonPressed(1)) {
 			mb = 1;
-			for (int i = 0; i < 1; i++)
-			{
+			/*for (int i = 0; i < 1; i++)
+			{*/
 
 				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
 				body->damping = editorData.damping;
@@ -60,13 +71,13 @@ int main(void)
 
 				AddBody(body);
 				//ApplyForce(body, (Vector2) { GetRandomFloatValue(-250, 250), GetRandomFloatValue(-250, 250) }, FM_VELOCITY);
-			}
+			//}
 		}
 
-		if (!ncEditorIntersect && IsMouseButtonDown(2)) {
+		if (!ncEditorIntersect && IsMouseButtonPressed(2)) {
 			mb = 2;
-			for (int i = 0; i < 1; i++)
-			{
+			/*for (int i = 0; i < 1; i++)
+			{*/
 
 				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
 				body->damping = editorData.damping;
@@ -74,6 +85,22 @@ int main(void)
 
 				AddBody(body);//GetRandomFloatValue(2, 10);
 				//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-250, 0), GetRandomValue(0, 250)), GetRandomFloatValue(-250, 50) }, FM_VELOCITY);
+			//}
+		}
+
+		if (IsKeyDown(KEY_DELETE))
+		{
+			//DestroyAllBodies();
+		}
+
+		if (IsKeyPressed(KEY_Q) && selectedBody) connectBody = selectedBody;
+		if (IsKeyDown(KEY_Q) && connectBody) DrawLineBodyToPosition(connectBody, position);
+		if (IsKeyReleased(KEY_Q) && connectBody)
+		{
+			if (selectedBody && selectedBody != connectBody)
+			{
+				Spring* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), 20);
+				AddSpring(spring);
 			}
 		}
 
@@ -108,16 +135,29 @@ int main(void)
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Vector2 screen = ConvertWorldToScreen(body->position);
-				DrawCircle((int)screen.x, screen.y, body->mass, (Color) { GetRandomFloatValue(0, 255), GetRandomFloatValue(0, 255), GetRandomFloatValue(0, 255), 255 });
+				DrawCircle((int)screen.x, screen.y, ConvertWorldToPixel(body->mass), WHITE);
 				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), WHITE);
 				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), YELLOW);
 				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), WHITE);
 			}
 
+			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+			}
+			/*for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+			}*/
+
 			DrawEditor(position);
 			break;
 		case 1:
-			ApplyGravitation(body, -30);
+			ApplyGravitation(body, editorData.GravitationValue);
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Step(body, dt);
@@ -148,10 +188,17 @@ int main(void)
 				}), ConvertWorldToPixel(body->mass), (Color) { GetRandomFloatValue(150, 255), GetRandomFloatValue(100, 255), GetRandomFloatValue(50, 255), 255 });
 			}
 
+			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+			}
+
 			DrawEditor(position);
 			break;
 		case 2:
-			ApplyGravitation(body, -30);
+			ApplyGravitation(body, -editorData.GravitationValue);
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Step(body, dt);
@@ -177,13 +224,21 @@ int main(void)
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Vector2 screen = ConvertWorldToScreen(body->position);
-				DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass + 8), (Color) { 255, 100, 0, GetRandomFloatValue(10, 175) });
+				DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass + 1), (Color) { 255, 100, 0, GetRandomFloatValue(10, 175) });
 				DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass), (Color) { 255, 255, 255, GetRandomFloatValue(10, 175) });
+			}
+
+			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
 			}
 
 			DrawEditor(position);
 			break;
 		}
+
 
 
 		/*while (body)

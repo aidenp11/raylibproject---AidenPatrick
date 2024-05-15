@@ -1,4 +1,6 @@
 #include "editor.h"
+#include "body.h"
+#include "render.h"
 #define RAYGUI_IMPLEMENTATION
 #include "../../raygui/src/raygui.h"
 
@@ -27,9 +29,9 @@ void InitEditor()
     editorData.anchor01 = (Vector2){ 816, 48 };
 
     editorData.EditorBoxActive = true;
-    editorData.massMinBarValue = 1.0f;
-    editorData.massMaxSliderValue = 3.0f;
-    editorData.GravitationValue = -30.0f;
+    editorData.massMinBarValue = 2.0f;
+    editorData.massMaxSliderValue = 2.0f;
+    editorData.GravitationValue = 0.0f;
 
     editorRect = (Rectangle){ editorData.anchor01.x + 0, editorData.anchor01.y + 0, 304, 616 };
 }
@@ -68,4 +70,24 @@ void DrawEditor(Vector2 position)
     }
 
     DrawTexture(cursorTexture, (int)position.x - cursorTexture.width / 2, (int)position.y - cursorTexture.height / 2, PINK);
+}
+
+Body* GetBodyIntersect(Body* bodies, Vector2 position)
+{
+    for (Body* body = bodies; body; body = body->next)
+    {
+        Vector2 screen = ConvertWorldToScreen(body->position);
+        if (CheckCollisionPointCircle(position, screen, ConvertWorldToPixel(body->mass)))
+        {
+            return body;
+        }
+    }
+
+    return NULL;
+}
+
+void DrawLineBodyToPosition(Body* body, Vector2 position)
+{
+    Vector2 screen = ConvertWorldToScreen(body->position);
+    DrawLine((int)screen.x, (int)screen.y, (int)position.x - cursorTexture.width / 2, (int)position.y - cursorTexture.height / 2, YELLOW);
 }
