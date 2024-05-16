@@ -6,6 +6,8 @@
 #include "editor.h"
 #include "render.h"
 #include "spring.h"
+#include "Collision.h"
+#include "contact.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -99,7 +101,7 @@ int main(void)
 		{
 			if (selectedBody && selectedBody != connectBody)
 			{
-				Spring* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), 20);
+				Spring* spring = CreateSpring(connectBody, selectedBody, Vector2Distance(connectBody->position, selectedBody->position), GetRandomFloatValue(30, 500));
 				AddSpring(spring);
 			}
 		}
@@ -114,6 +116,10 @@ int main(void)
 			{
 				Step(body, dt);
 			}
+
+			//collision
+			Contact_t* contacts = NULL;
+			CreateContacts(bodies, &contacts);
 
 			//body = bodies;
 			//while (body)
@@ -131,22 +137,29 @@ int main(void)
 
 			//DrawCircle((int)position.x, (int)position.y, 10, WHITE);
 
-			//body = bodies;
-			for (Body* body = bodies; body; body = body->next)
-			{
-				Vector2 screen = ConvertWorldToScreen(body->position);
-				DrawCircle((int)screen.x, screen.y, ConvertWorldToPixel(body->mass), WHITE);
-				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), WHITE);
-				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), YELLOW);
-				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass - 1), WHITE);
-			}
-
 			for (Spring* Spring = springs; Spring; Spring = Spring->next)
 			{
 				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
 				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				ApplySpringForce(Spring);
 				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
 			}
+			//body = bodies;
+			for (Body* body = bodies; body; body = body->next)
+			{
+				Vector2 screen = ConvertWorldToScreen(body->position);
+				DrawCircle((int)screen.x, screen.y, ConvertWorldToPixel(body->mass * 0.5f), WHITE);
+				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass * 0.5f - 1), WHITE);
+				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass * 0.5f - 1), YELLOW);
+				DrawCircle((int)screen.x + GetRandomFloatValue(-10, 10), screen.y + GetRandomFloatValue(-10, 10), ConvertWorldToPixel(body->mass * 0.5f - 1), WHITE);
+			}
+
+			for (Contact_t* contact = contacts; contact; contact = contact->next)
+			{
+				Vector2 screen = ConvertWorldToScreen(contact->body1->position);
+				DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass * 0.5f), RED);
+			}
+
 			/*for (Spring* Spring = springs; Spring; Spring = Spring->next)
 			{
 				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
@@ -163,6 +176,8 @@ int main(void)
 				Step(body, dt);
 			}
 
+			contacts = NULL;
+			CreateContacts(bodies, &contacts);
 			//body = bodies;
 			//while (body)
 			//{
@@ -180,6 +195,14 @@ int main(void)
 		//	DrawCircle((int)position.x, (int)position.y, 10, WHITE);
 
 			//body = bodies;
+			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				ApplySpringForce(Spring);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+			}
+
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Vector2 screen = ConvertWorldToScreen(body->position);
@@ -188,11 +211,10 @@ int main(void)
 				}), ConvertWorldToPixel(body->mass), (Color) { GetRandomFloatValue(150, 255), GetRandomFloatValue(100, 255), GetRandomFloatValue(50, 255), 255 });
 			}
 
-			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			for (Contact_t* contact = contacts; contact; contact = contact->next)
 			{
-				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
-				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
-				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+				Vector2 screen = ConvertWorldToScreen(contact->body1->position);
+				DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass * 0.5f), RED);
 			}
 
 			DrawEditor(position);
@@ -204,6 +226,8 @@ int main(void)
 				Step(body, dt);
 			}
 
+			contacts = NULL;
+			CreateContacts(bodies, &contacts);
 			//body = bodies;
 			//while (body)
 			//{
@@ -220,6 +244,13 @@ int main(void)
 
 			//DrawCircle((int)position.x, (int)position.y, 10, WHITE);
 
+			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			{
+				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
+				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
+				ApplySpringForce(Spring);
+				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+			}
 			//body = bodies;
 			for (Body* body = bodies; body; body = body->next)
 			{
@@ -228,12 +259,12 @@ int main(void)
 				DrawCircle(screen.x, screen.y, ConvertWorldToPixel(body->mass), (Color) { 255, 255, 255, GetRandomFloatValue(10, 175) });
 			}
 
-			for (Spring* Spring = springs; Spring; Spring = Spring->next)
+			for (Contact_t* contact = contacts; contact; contact = contact->next)
 			{
-				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
-				Vector2 screen2 = ConvertWorldToScreen(Spring->body2->position);
-				DrawLine((int)screen1.x, (int)screen1.y, (int)screen2.x, (int)screen2.y, YELLOW);
+				Vector2 screen = ConvertWorldToScreen(contact->body1->position);
+				DrawCircle((int)screen.x, (int)screen.y, ConvertWorldToPixel(contact->body1->mass * 0.5f), RED);
 			}
+
 
 			DrawEditor(position);
 			break;

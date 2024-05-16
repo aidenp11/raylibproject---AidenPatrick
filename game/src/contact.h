@@ -3,8 +3,8 @@
 
 typedef struct Contact
 {
-	struct ncBody* body1;
-	struct ncBody* body2;
+	struct Body* body1;
+	struct Body* body2;
 
 	float restitution;
 	float depth;

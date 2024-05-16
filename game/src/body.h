@@ -30,6 +30,8 @@ typedef struct Body
 	float gravityScale;
 	float damping;
 
+	float restitution;
+
 	struct Body* next;
 	struct Body* prev;
 } Body;

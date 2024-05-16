@@ -1,4 +1,5 @@
 #include "spring.h"
+#include "body.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -9,12 +10,12 @@ Spring* springs = NULL;
 int SpringCount = 0;
 Vector2 gravity;
 
-Spring* CreateSpring(struct Body* body1, struct Body* body2, float restLength, float k)
+Spring* CreateSpring(Body* body1, Body* body2, float restLength, float k)
 {
 	Spring* newSpring = (Spring*)malloc(sizeof(Spring));
 	assert(newSpring);
 
-	memset(newSpring, 0, sizeof(newSpring));
+	memset(newSpring, 0, sizeof(Spring));
 	newSpring->body1 = body1;
 	newSpring->body2 = body2;
 	newSpring->restLength = restLength;
@@ -60,4 +61,18 @@ void DestroySpring(Spring* Spring)
 
 void ApplySpringForce(Spring* spring)
 {
+	for (Spring* spring = springs; spring; spring = spring->next)
+	{
+		Vector2 direction = Vector2Subtract(spring->body1->position, spring->body2->position);
+		if (direction.x == 0 && direction.y == 0) continue;
+
+		float length = Vector2Length(direction);
+		float x = length - spring->restLength;
+		float force = -spring->k * x;
+
+		Vector2 ndirection = Vector2Normalize(direction);
+
+		ApplyForce(spring->body1, Vector2Scale(ndirection, force), FM_FORCE);
+		ApplyForce(spring->body2, Vector2Scale(Vector2Negate(ndirection), force), FM_FORCE);
+	}
 }

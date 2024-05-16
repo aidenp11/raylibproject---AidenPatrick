@@ -12,7 +12,7 @@ Body* CreateBody(Vector2 position, float mass, BodyType bodyType)
 	Body* newBody = (Body*)malloc(sizeof(Body));
 	assert(newBody);
 
-	memset(newBody, 0, sizeof(newBody));
+	memset(newBody, 0, sizeof(Body));
 	newBody->position = position;
 	newBody->mass = mass;
 	newBody->inverseMass = (bodyType == BT_DYNAMIC) ? 1 / mass : 0;
