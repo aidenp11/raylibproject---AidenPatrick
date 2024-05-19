@@ -28,11 +28,12 @@ int main(void)
 	InitEditor();
 	SetTargetFPS(60);
 
-	gravity = (Vector2){ 0, 100 };
+	gravity = (Vector2){ 0, -10 };
 
 	// game loop
 	while (!WindowShouldClose())
 	{
+
 		float dt = GetFrameTime();
 		float fps = (float)GetFPS();
 
@@ -48,46 +49,49 @@ int main(void)
 			DrawCircleLines(screen.x, screen.y, ConvertWorldToPixel(selectedBody->mass) + 5, YELLOW);
 		}
 
-		if (!ncEditorIntersect && IsMouseButtonPressed(0)) {
+		if (!ncEditorIntersect && IsMouseButtonPressed(0) || (IsMouseButtonDown(0) && IsKeyDown(KEY_P))) {
 			mb = 0;
 			/*for (int i = 0; i < 1; i++)
 			{*/
 
-				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
-				body->damping = editorData.damping;
-				body->gravityScale = editorData.GravityScale;
+			Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
+			body->damping = editorData.damping;
+			body->gravityScale = editorData.GravityScaleSliderValue;
+			body->restitution = 0.3f;
 
-				AddBody(body);
-				//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-500, 0), GetRandomValue(0, 500)), GetRandomFloatValue(GetRandomValue(-600, 0), GetRandomValue(0, 600)) }, FM_VELOCITY);
-			//}
+			AddBody(body);
+			//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-500, 0), GetRandomValue(0, 500)), GetRandomFloatValue(GetRandomValue(-600, 0), GetRandomValue(0, 600)) }, FM_VELOCITY);
+		//}
 		}
 
-		if (!ncEditorIntersect && IsMouseButtonPressed(1)) {
+		if (!ncEditorIntersect && IsMouseButtonPressed(1) || (IsMouseButtonDown(1) && IsKeyDown(KEY_P))) {
 			mb = 1;
 			/*for (int i = 0; i < 1; i++)
 			{*/
 
-				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
-				body->damping = editorData.damping;
-				body->gravityScale = editorData.GravityScale;
+			Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
+			body->damping = editorData.damping;
+			body->gravityScale = editorData.GravityScaleSliderValue;
+			body->restitution = 0.3f;
 
-				AddBody(body);
-				//ApplyForce(body, (Vector2) { GetRandomFloatValue(-250, 250), GetRandomFloatValue(-250, 250) }, FM_VELOCITY);
-			//}
+			AddBody(body);
+			//ApplyForce(body, (Vector2) { GetRandomFloatValue(-250, 250), GetRandomFloatValue(-250, 250) }, FM_VELOCITY);
+		//}
 		}
 
-		if (!ncEditorIntersect && IsMouseButtonPressed(2)) {
+		if (!ncEditorIntersect && IsMouseButtonPressed(2) || (IsMouseButtonDown(2) && IsKeyDown(KEY_P))) {
 			mb = 2;
 			/*for (int i = 0; i < 1; i++)
 			{*/
 
-				Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
-				body->damping = editorData.damping;
-				body->gravityScale = editorData.GravityScale;
+			Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
+			body->damping = editorData.damping;
+			body->gravityScale = editorData.GravityScaleSliderValue;
+			body->restitution = 0.3f;
 
-				AddBody(body);//GetRandomFloatValue(2, 10);
-				//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-250, 0), GetRandomValue(0, 250)), GetRandomFloatValue(-250, 50) }, FM_VELOCITY);
-			//}
+			AddBody(body);//GetRandomFloatValue(2, 10);
+			//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-250, 0), GetRandomValue(0, 250)), GetRandomFloatValue(-250, 50) }, FM_VELOCITY);
+		//}
 		}
 
 		if (IsKeyDown(KEY_DELETE))
@@ -120,6 +124,8 @@ int main(void)
 			//collision
 			Contact_t* contacts = NULL;
 			CreateContacts(bodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
 
 			//body = bodies;
 			//while (body)
@@ -178,6 +184,8 @@ int main(void)
 
 			contacts = NULL;
 			CreateContacts(bodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
 			//body = bodies;
 			//while (body)
 			//{
@@ -192,9 +200,9 @@ int main(void)
 			DrawText(TextFormat("FPS: %.2f (%.2f ms)", fps, 1000 / fps), 10, 10, 20, WHITE);
 			DrawText(TextFormat("FRAME: %.4f", dt), 10, 30, 20, WHITE);
 
-		//	DrawCircle((int)position.x, (int)position.y, 10, WHITE);
+			//	DrawCircle((int)position.x, (int)position.y, 10, WHITE);
 
-			//body = bodies;
+				//body = bodies;
 			for (Spring* Spring = springs; Spring; Spring = Spring->next)
 			{
 				Vector2 screen1 = ConvertWorldToScreen(Spring->body1->position);
@@ -206,7 +214,7 @@ int main(void)
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Vector2 screen = ConvertWorldToScreen(body->position);
-				DrawLineEx((Vector2) {screen.x, screen.y }, Vector2Add((Vector2) { screen.x, screen.y }, (Vector2) {
+				DrawLineEx((Vector2) { screen.x, screen.y }, Vector2Add((Vector2) { screen.x, screen.y }, (Vector2) {
 					GetRandomFloatValue(-5, 5), GetRandomFloatValue(-5, 5)
 				}), ConvertWorldToPixel(body->mass), (Color) { GetRandomFloatValue(150, 255), GetRandomFloatValue(100, 255), GetRandomFloatValue(50, 255), 255 });
 			}
@@ -228,6 +236,8 @@ int main(void)
 
 			contacts = NULL;
 			CreateContacts(bodies, &contacts);
+			SeparateContacts(contacts);
+			ResolveContacts(contacts);
 			//body = bodies;
 			//while (body)
 			//{

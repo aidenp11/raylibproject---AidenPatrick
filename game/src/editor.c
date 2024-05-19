@@ -32,6 +32,7 @@ void InitEditor()
     editorData.massMinBarValue = 2.0f;
     editorData.massMaxSliderValue = 2.0f;
     editorData.GravitationValue = 0.0f;
+    editorData.GravityScaleSliderValue = 0.0f;
 
     editorRect = (Rectangle){ editorData.anchor01.x + 0, editorData.anchor01.y + 0, 304, 616 };
 }
@@ -64,7 +65,7 @@ void DrawEditor(Vector2 position)
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 64, 120, 16 }, "Mass Min", NULL, & editorData.massMinBarValue, 0, 15);
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 96, 120, 16 }, "Mass Max", NULL, & editorData.massMaxSliderValue, 0, 15);
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 242, 120, 16 }, "Gravitation", NULL, & editorData.GravitationValue, -100, 100);
-        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 282, 120, 16 }, "Gravity Scale", NULL, & editorData.GravityScaleSliderValue, 0, 150);
+        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 282, 120, 16 }, "Gravity Scale", NULL, & editorData.GravityScaleSliderValue, -150, 150);
         if (GuiDropdownBox((Rectangle) { editorData.anchor01.x + 96, editorData.anchor01.y + 136, 120, 24 }, "Dynamic;Kinematic;Static", & editorData.DropdownBox004Active, editorData.DropdownBox004EditMode)) editorData.DropdownBox004EditMode = !editorData.DropdownBox004EditMode;
 
     }
