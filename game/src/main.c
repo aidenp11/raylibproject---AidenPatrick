@@ -23,6 +23,10 @@ int main(void)
 {
 	Body* selectedBody = NULL;
 	Body* connectBody = NULL;
+	Contact_t* contacts = NULL;
+
+	float fixedTimeStep = 1.0f / 60.0f;
+	float timeAccumulator = 0;
 
 	InitWindow(1200, 720, "Physics Engine");
 	InitEditor();
@@ -35,6 +39,7 @@ int main(void)
 	{
 
 		float dt = GetFrameTime();
+		timeAccumulator += dt;
 		float fps = (float)GetFPS();
 
 		Vector2 position = GetMousePosition();
@@ -86,9 +91,8 @@ int main(void)
 
 			Body* body = CreateBody(ConvertScreenToWorld(position), GetRandomFloatValue(editorData.massMinBarValue, editorData.massMaxSliderValue), editorData.bodyType);
 			body->damping = editorData.damping;
-			body->gravityScale = editorData.GravityScaleSliderValue;
 			body->restitution = 0.3f;
-
+			body->gravityScale = editorData.GravityScaleSliderValue;
 			AddBody(body);//GetRandomFloatValue(2, 10);
 			//ApplyForce(body, (Vector2) { GetRandomFloatValue(GetRandomValue(-250, 0), GetRandomValue(0, 250)), GetRandomFloatValue(-250, 50) }, FM_VELOCITY);
 		//}
@@ -111,13 +115,13 @@ int main(void)
 		}
 
 		Body* body = bodies;
-		switch (mb)
+		while (timeAccumulator >= fixedTimeStep)
 		{
-		case 0:
-
+			timeAccumulator -= fixedTimeStep;
 			ApplyGravitation(body, editorData.GravitationValue);
 			for (Body* body = bodies; body; body = body->next)
 			{
+				body->gravityScale = editorData.GravityScaleSliderValue;
 				Step(body, dt);
 			}
 
@@ -126,6 +130,26 @@ int main(void)
 			CreateContacts(bodies, &contacts);
 			SeparateContacts(contacts);
 			ResolveContacts(contacts);
+		}
+
+		ApplyGravitation(body, editorData.GravitationValue);
+		for (Body* body = bodies; body; body = body->next)
+		{
+			body->gravityScale = editorData.GravityScaleSliderValue;
+			Step(body, dt);
+		}
+
+		//collision
+		Contact_t* contacts = NULL;
+		CreateContacts(bodies, &contacts);
+		SeparateContacts(contacts);
+		ResolveContacts(contacts);
+
+		switch (mb)
+		{
+		case 0:
+
+
 
 			//body = bodies;
 			//while (body)
@@ -176,7 +200,7 @@ int main(void)
 			DrawEditor(position);
 			break;
 		case 1:
-			ApplyGravitation(body, editorData.GravitationValue);
+			/*ApplyGravitation(body, editorData.GravitationValue);
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Step(body, dt);
@@ -185,7 +209,7 @@ int main(void)
 			contacts = NULL;
 			CreateContacts(bodies, &contacts);
 			SeparateContacts(contacts);
-			ResolveContacts(contacts);
+			ResolveContacts(contacts);*/
 			//body = bodies;
 			//while (body)
 			//{
@@ -228,7 +252,7 @@ int main(void)
 			DrawEditor(position);
 			break;
 		case 2:
-			ApplyGravitation(body, -editorData.GravitationValue);
+			/*ApplyGravitation(body, -editorData.GravitationValue);
 			for (Body* body = bodies; body; body = body->next)
 			{
 				Step(body, dt);
@@ -237,7 +261,7 @@ int main(void)
 			contacts = NULL;
 			CreateContacts(bodies, &contacts);
 			SeparateContacts(contacts);
-			ResolveContacts(contacts);
+			ResolveContacts(contacts);*/
 			//body = bodies;
 			//while (body)
 			//{
@@ -279,6 +303,7 @@ int main(void)
 			DrawEditor(position);
 			break;
 		}
+		
 
 
 

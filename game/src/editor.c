@@ -4,6 +4,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "../../raygui/src/raygui.h"
 
+#define EDITOR_DATA(data) TextFormat("%0.2f", data), &data
+
 bool ncEditorActive = true;
 bool ncEditorIntersect = false;
 Rectangle editorRect;
@@ -61,8 +63,8 @@ void DrawEditor(Vector2 position)
     if (editorData.EditorBoxActive)
     {
         editorData.EditorBoxActive = !GuiWindowBox((Rectangle){ editorData.anchor01.x + 0, editorData.anchor01.y + 0, 304, 616 }, "Editor Box");
-        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 24, 120, 16 }, "Damping", NULL, & editorData.damping, -15, 15);
-        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 64, 120, 16 }, "Mass Min", NULL, & editorData.massMinBarValue, 0, 15);
+        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 24, 120, 16 }, "Damping", EDITOR_DATA(editorData.damping), -15, 15);
+        GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 64, 120, 16 }, "Mass Min", EDITOR_DATA(editorData.massMinBarValue), 0, 15);
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 96, 120, 16 }, "Mass Max", NULL, & editorData.massMaxSliderValue, 0, 15);
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 242, 120, 16 }, "Gravitation", NULL, & editorData.GravitationValue, -100, 100);
         GuiSliderBar((Rectangle) { editorData.anchor01.x + 120, editorData.anchor01.y + 282, 120, 16 }, "Gravity Scale", NULL, & editorData.GravityScaleSliderValue, -150, 150);

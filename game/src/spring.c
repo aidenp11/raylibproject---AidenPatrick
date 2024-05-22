@@ -76,3 +76,36 @@ void ApplySpringForce(Spring* spring)
 		ApplyForce(spring->body2, Vector2Scale(Vector2Negate(ndirection), force), FM_FORCE);
 	}
 }
+
+//void ApplySpringForcePosition(Vector2 position, Body* body, float restLength, float k, float damping)
+//{
+//	// Check if the body pointer is null; if so, exit the function
+//	if (!body) return;
+//
+//	// Calculate the direction vector from the body's position to the given position
+//	Vector2 direction = Vector2Subtract(position, body->position);
+//
+//	// If the direction vector is zero (i.e., positions are the same), exit the function
+//	if (direction.x == 0 && direction.y == 0) return;
+//
+//	// Calculate the length of the direction vector (distance between the two positions)
+//	float length = Vector2Length(direction);
+//
+//	// Calculate the displacement from the rest length
+//	float x = <get displacement>
+//
+//		// Apply Hooke's Law (f = -kx) to determine the spring force
+//		float force = <Hooke’s Law>
+//
+//		// Normalize the direction vector
+//		Vector2 ndirection = <normalize vector>
+//
+//		// Calculate the damping force (opposing force due to velocity)
+//		float dampingForce = <damping * DotProduct(body velocity, ndirection)>
+//
+//		// Calculate the total force by combining spring force and damping force
+//		float totalForce = <force + damping force>
+//
+//		// Apply the total force to the body in the direction of the normalized vector
+//		ApplyForce(body, <scale the normalized direction vector by - totalForce >, FM_FORCE);
+//}

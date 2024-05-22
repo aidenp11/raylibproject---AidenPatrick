@@ -18,3 +18,4 @@ void AddSpring(Spring* Spring);
 void DestroySpring(Spring* Spring);
 void DestroyAllSprings();
 void ApplySpringForce(Spring* Spring);
+//void ApplySpringForcePosition(Vector2 position, Body* body, float restLength, float k, float damping);
